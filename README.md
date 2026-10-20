@@ -68,11 +68,22 @@ Cuando termine, **abre una terminal nueva** para que reconozca el comando.
 youtube-transcript "https://www.youtube.com/watch?v=OgHQTezKE4Q"
 ```
 
-Crea `OgHQTezKE4Q.txt` en la carpeta donde estás, con todo el texto del video en un solo bloque. Acepta cualquier formato de link (`youtu.be/...`, `/shorts/...`, `/live/...`) o solo el ID (`OgHQTezKE4Q`).
+Crea `OgHQTezKE4Q.txt` en la carpeta donde estás, con todo el texto del video en un solo bloque. En pantalla solo ves el progreso; para ver también el texto agrega `--print`. Acepta cualquier formato de link (`youtu.be/...`, `/shorts/...`, `/live/...`) o solo el ID (`OgHQTezKE4Q`).
 
 ### Ejemplos
 
 ```bash
+# Ver el texto en pantalla (y guardarlo igual)
+youtube-transcript OgHQTezKE4Q --print
+
+# Solo en pantalla, sin crear archivo
+youtube-transcript OgHQTezKE4Q -o -
+
+# Copiarlo directo al portapapeles
+youtube-transcript OgHQTezKE4Q -o - | Set-Clipboard   # Windows (PowerShell)
+youtube-transcript OgHQTezKE4Q -o - | pbcopy          # macOS
+youtube-transcript OgHQTezKE4Q -o - | xclip -sel c    # Linux
+
 # Guardar con otro nombre
 youtube-transcript "https://youtu.be/OgHQTezKE4Q" -o claude-design.txt
 
@@ -94,7 +105,8 @@ youtube-transcript OgHQTezKE4Q --cookies-from-browser firefox
 
 | Opción | Qué hace | Por defecto |
 |---|---|---|
-| `-o archivo.txt` | Nombre del archivo de salida | `<id-del-video>.txt` |
+| `-o archivo.txt` | Nombre del archivo de salida. Con `-o -` muestra el texto en pantalla y no crea archivo | `<id-del-video>.txt` |
+| `-p`, `--print` | Además de guardar el archivo, muestra el texto en pantalla | apagado |
 | `--langs es en` | Idiomas preferidos para los subtítulos, en orden. Si no existe ninguno, usa el que haya y lo traduce al primero | `es en` |
 | `--whisper` | Ignora los subtítulos y transcribe el audio | apagado |
 | `--model` | Modelo de Whisper: `tiny`, `base`, `small`, `medium`, `large-v3` | `small` |

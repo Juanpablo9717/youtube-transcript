@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "youtube-transcript"
-version = "0.2.0"
+version = "0.3.0"
 description = "Saca el texto de un video de YouTube: subtitulos si hay, si no transcribe el audio con Whisper."
 readme = "README.md"
 requires-python = ">=3.9"

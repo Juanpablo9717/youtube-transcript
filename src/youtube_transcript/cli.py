@@ -118,13 +118,28 @@ def from_audio(url: str, model_size: str, lang: str | None, browser: str | None)
         return " ".join(parts)
 
 
+def write_stdout(text: str) -> None:
+    """Imprime el texto. Si va por un pipe en Windows, usa la pagina de codigos de la
+    consola para que PowerShell/cmd (| Set-Clipboard, | clip, ...) no rompan los acentos."""
+    if sys.platform == "win32" and not sys.stdout.isatty():
+        import ctypes
+
+        cp = ctypes.windll.kernel32.GetConsoleOutputCP()
+        if cp:
+            sys.stdout.reconfigure(encoding=f"cp{cp}", errors="replace")
+    else:
+        sys.stdout.reconfigure(errors="replace")
+    print(text)
+
+
 def main():
     p = argparse.ArgumentParser(prog="youtube-transcript", description="Texto de un video de YouTube")
     p.add_argument("url")
     p.add_argument("--langs", nargs="+", default=["es", "en"], help="idiomas preferidos")
     p.add_argument("--whisper", action="store_true", help="forzar transcripcion por audio")
     p.add_argument("--model", default="small", help="tiny, base, small, medium, large-v3")
-    p.add_argument("-o", "--output", help="archivo de salida (por defecto <id>.txt)")
+    p.add_argument("-o", "--output", help="archivo de salida (por defecto <id>.txt); '-' = solo pantalla, sin archivo")
+    p.add_argument("-p", "--print", action="store_true", help="ademas de guardar el archivo, muestra el texto en pantalla")
     p.add_argument("--cookies-from-browser", metavar="NAVEGADOR",
                    help="usa la sesion de YouTube de tu navegador si YouTube bloquea (firefox, chrome, edge, brave)")
     a = p.parse_args()
@@ -136,9 +151,17 @@ def main():
     if not text:
         text = from_audio(url, a.model, None if len(a.langs) != 1 else a.langs[0], a.cookies_from_browser)
 
+    words = len(text.split())
+    if a.output == "-":
+        write_stdout(text)
+        print(f"Listo ({words} palabras)", file=sys.stderr)
+        return
+
     out = Path(a.output or f"{vid}.txt")
     out.write_text(text, encoding="utf-8")
-    print(f"Listo: {out} ({len(text.split())} palabras)", file=sys.stderr)
+    if a.print:
+        write_stdout(text)
+    print(f"Listo: {out} ({words} palabras)", file=sys.stderr)
 
 
 if __name__ == "__main__":
