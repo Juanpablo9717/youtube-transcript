@@ -31,7 +31,9 @@ def from_captions(vid: str, langs: list[str]) -> str | None:
     try:
         tlist = api.list(vid)
     except Exception as e:
-        print(f"[captions] No disponibles: {type(e).__name__}", file=sys.stderr)
+        name = type(e).__name__
+        why = "YouTube bloqueo la consulta (demasiadas seguidas)" if "Blocked" in name else name
+        print(f"[captions] No disponibles: {why}; pruebo con el audio.", file=sys.stderr)
         return None
     try:
         t = tlist.find_transcript(langs)
@@ -67,7 +69,16 @@ def load_audio(path: Path):
     return np.concatenate(chunks).astype(np.float32) / 32768.0
 
 
-def from_audio(url: str, model_size: str, lang: str | None) -> str:
+BLOQUEO = (
+    "YouTube esta bloqueando las descargas desde tu conexion (pasa si haces muchas seguidas).\n"
+    "  - Espera un rato (de minutos a una hora) y vuelve a intentar, o\n"
+    "  - usa las cookies de tu navegador con sesion de YouTube abierta:\n"
+    "      yt-texto URL --cookies-from-browser firefox   (tambien: chrome, edge, brave)\n"
+    "    En Windows, Chrome/Edge deben estar cerrados; Firefox suele funcionar mejor."
+)
+
+
+def from_audio(url: str, model_size: str, lang: str | None, browser: str | None) -> str:
     ensure(("yt_dlp", "yt-dlp"), ("faster_whisper", "faster-whisper"), ("numpy", "numpy"))
     import yt_dlp
     from faster_whisper import WhisperModel
@@ -78,10 +89,21 @@ def from_audio(url: str, model_size: str, lang: str | None) -> str:
             "outtmpl": str(Path(tmp) / "audio.%(ext)s"),
             "quiet": True,
             "no_warnings": True,
+            "noprogress": True,
         }
+        if browser:
+            opts["cookiesfrombrowser"] = (browser,)
         print("[audio] Descargando audio...", file=sys.stderr)
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            ydl.download([url])
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                ydl.download([url])
+        except yt_dlp.utils.DownloadError as e:
+            msg = str(e)
+            if "not a bot" in msg or "Sign in" in msg or "429" in msg:
+                sys.exit(f"[audio] {BLOQUEO}")
+            sys.exit(f"[audio] No pude descargar el audio: {msg.removeprefix('ERROR: ')}")
+        except Exception as e:  # p.ej. no puede leer las cookies del navegador
+            sys.exit(f"[audio] Error: {e}")
         audio = next(Path(tmp).glob("audio.*"))
 
         print(f"[audio] Transcribiendo con Whisper '{model_size}' (CPU)...", file=sys.stderr)
@@ -103,6 +125,8 @@ def main():
     p.add_argument("--whisper", action="store_true", help="forzar transcripcion por audio")
     p.add_argument("--model", default="small", help="tiny, base, small, medium, large-v3")
     p.add_argument("-o", "--output", help="archivo de salida (por defecto <id>.txt)")
+    p.add_argument("--cookies-from-browser", metavar="NAVEGADOR",
+                   help="usa la sesion de YouTube de tu navegador si YouTube bloquea (firefox, chrome, edge, brave)")
     a = p.parse_args()
 
     vid = video_id(a.url)
@@ -110,7 +134,7 @@ def main():
 
     text = None if a.whisper else from_captions(vid, a.langs)
     if not text:
-        text = from_audio(url, a.model, None if len(a.langs) != 1 else a.langs[0])
+        text = from_audio(url, a.model, None if len(a.langs) != 1 else a.langs[0], a.cookies_from_browser)
 
     out = Path(a.output or f"{vid}.txt")
     out.write_text(text, encoding="utf-8")

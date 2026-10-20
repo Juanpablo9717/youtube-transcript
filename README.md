@@ -47,6 +47,11 @@ Deja `OgHQTezKE4Q.txt` en la carpeta actual.
 | `--whisper` | Ignora los subtítulos y transcribe el audio |
 | `--model small` | Modelo de Whisper: `tiny`, `base`, `small`, `medium`, `large-v3`. Más grande = más preciso y más lento |
 | `-o archivo.txt` | Nombre del archivo de salida |
+| `--cookies-from-browser firefox` | Usa tu sesión de YouTube del navegador (`firefox`, `chrome`, `edge`, `brave`) si YouTube bloquea |
+
+### Si YouTube te bloquea
+
+Si haces muchas descargas seguidas, YouTube puede responder *"Sign in to confirm you're not a bot"* o bloquear los subtítulos. Puedes esperar un rato (de minutos a una hora) o usar `--cookies-from-browser` con un navegador donde tengas YouTube abierto. En Windows, Chrome y Edge tienen que estar cerrados para leer sus cookies; Firefox suele funcionar mejor.
 
 Como referencia, un video de 9 minutos con `--model base` tarda alrededor de 1 minuto en CPU. La primera vez se descarga el modelo.
 
