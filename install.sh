@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
-# Instalador de yt-texto para macOS y Linux.
+# Instalador de youtube-transcript para macOS y Linux.
 # Detecta Python (lo instala con brew/apt/dnf/pacman/zypper/apk si falta), crea un
-# entorno aislado en ~/.yt-texto y deja el comando `yt-texto` en ~/.local/bin.
+# entorno aislado en ~/.youtube-transcript y deja el comando `youtube-transcript` en ~/.local/bin.
 #
 # Desde una copia del repo:   sh install.sh
 # Sin clonar:                 curl -fsSL https://raw.githubusercontent.com/Juanpablo9717/youtube-transcript/main/install.sh | sh
@@ -9,14 +9,14 @@
 set -eu
 
 REPO="https://github.com/Juanpablo9717/youtube-transcript"
-PREFIX="$HOME/.yt-texto"
+PREFIX="$HOME/.youtube-transcript"
 VENV="$PREFIX/venv"
 BIN="$HOME/.local/bin"
 EXTRA="[audio]"
 [ "${1:-}" = "--sin-audio" ] && EXTRA=""
 
-say() { printf '\033[36m[yt-texto]\033[0m %s\n' "$*"; }
-die() { printf '\033[31m[yt-texto]\033[0m %s\n' "$*" >&2; exit 1; }
+say() { printf '\033[36m[youtube-transcript]\033[0m %s\n' "$*"; }
+die() { printf '\033[31m[youtube-transcript]\033[0m %s\n' "$*" >&2; exit 1; }
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -74,14 +74,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd || echo "")"
 if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/pyproject.toml" ]; then
     SPEC="$SCRIPT_DIR$EXTRA"
 else
-    SPEC="yt-texto$EXTRA @ $REPO/archive/refs/heads/main.zip"
+    SPEC="youtube-transcript$EXTRA @ $REPO/archive/refs/heads/main.zip"
 fi
 say "Instalando dependencias (la primera vez puede tardar unos minutos)..."
 "$VENV/bin/python" -m pip install --quiet --upgrade "$SPEC"
 
 # 4. Comando en el PATH
 mkdir -p "$BIN"
-ln -sf "$VENV/bin/yt-texto" "$BIN/yt-texto"
+ln -sf "$VENV/bin/youtube-transcript" "$BIN/youtube-transcript"
 case ":$PATH:" in
     *":$BIN:"*) ;;
     *)
@@ -94,4 +94,4 @@ case ":$PATH:" in
         say "Abre una terminal nueva (o corre: export PATH=\"\$HOME/.local/bin:\$PATH\")" ;;
 esac
 
-say "Listo. Prueba:  yt-texto \"https://www.youtube.com/watch?v=...\""
+say "Listo. Prueba:  youtube-transcript \"https://www.youtube.com/watch?v=...\""

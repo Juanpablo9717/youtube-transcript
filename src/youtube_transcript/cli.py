@@ -73,7 +73,7 @@ BLOQUEO = (
     "YouTube esta bloqueando las descargas desde tu conexion (pasa si haces muchas seguidas).\n"
     "  - Espera un rato (de minutos a una hora) y vuelve a intentar, o\n"
     "  - usa las cookies de tu navegador con sesion de YouTube abierta:\n"
-    "      yt-texto URL --cookies-from-browser firefox   (tambien: chrome, edge, brave)\n"
+    "      youtube-transcript URL --cookies-from-browser firefox   (tambien: chrome, edge, brave)\n"
     "    En Windows, Chrome/Edge deben estar cerrados; Firefox suele funcionar mejor."
 )
 
@@ -119,7 +119,7 @@ def from_audio(url: str, model_size: str, lang: str | None, browser: str | None)
 
 
 def main():
-    p = argparse.ArgumentParser(prog="yt-texto", description="Texto de un video de YouTube")
+    p = argparse.ArgumentParser(prog="youtube-transcript", description="Texto de un video de YouTube")
     p.add_argument("url")
     p.add_argument("--langs", nargs="+", default=["es", "en"], help="idiomas preferidos")
     p.add_argument("--whisper", action="store_true", help="forzar transcripcion por audio")

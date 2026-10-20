@@ -1,6 +1,6 @@
-# Instalador de yt-texto para Windows.
+# Instalador de youtube-transcript para Windows.
 # Detecta Python (lo instala con winget si falta), crea un entorno aislado
-# en %USERPROFILE%\.yt-texto y deja el comando `yt-texto` en el PATH.
+# en %USERPROFILE%\.youtube-transcript y deja el comando `youtube-transcript` en el PATH.
 #
 # Desde una copia del repo:   powershell -ExecutionPolicy Bypass -File install.ps1
 # Sin clonar:                 irm https://raw.githubusercontent.com/Juanpablo9717/youtube-transcript/main/install.ps1 | iex
@@ -8,11 +8,11 @@ param([switch]$SinAudio)
 
 $ErrorActionPreference = "Stop"
 $Repo   = "https://github.com/Juanpablo9717/youtube-transcript"
-$Prefix = Join-Path $env:USERPROFILE ".yt-texto"
+$Prefix = Join-Path $env:USERPROFILE ".youtube-transcript"
 $Venv   = Join-Path $Prefix "venv"
 $Bin    = Join-Path $Prefix "bin"
 
-function Say($msg) { Write-Host "[yt-texto] $msg" -ForegroundColor Cyan }
+function Say($msg) { Write-Host "[youtube-transcript] $msg" -ForegroundColor Cyan }
 
 function Test-Python($exe, $extra) {
     try {
@@ -68,7 +68,7 @@ $local = if ($PSScriptRoot) { Join-Path $PSScriptRoot "pyproject.toml" } else { 
 if ($local -and (Test-Path $local)) {
     $spec = "$PSScriptRoot$extra"
 } else {
-    $spec = "yt-texto$extra @ $Repo/archive/refs/heads/main.zip"
+    $spec = "youtube-transcript$extra @ $Repo/archive/refs/heads/main.zip"
 }
 Say "Instalando dependencias (la primera vez puede tardar unos minutos)..."
 & $vpy -m pip install --quiet --upgrade $spec
@@ -76,7 +76,7 @@ if ($LASTEXITCODE -ne 0) { throw "Fallo pip install." }
 
 # 4. Comando en el PATH (solo un .cmd, para no tapar otros python.exe)
 New-Item -ItemType Directory -Force $Bin | Out-Null
-Set-Content -Encoding ascii (Join-Path $Bin "yt-texto.cmd") "@`"$Venv\Scripts\yt-texto.exe`" %*"
+Set-Content -Encoding ascii (Join-Path $Bin "youtube-transcript.cmd") "@`"$Venv\Scripts\youtube-transcript.exe`" %*"
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if (($userPath -split ";") -notcontains $Bin) {
     [Environment]::SetEnvironmentVariable("Path", "$userPath;$Bin", "User")
@@ -84,4 +84,4 @@ if (($userPath -split ";") -notcontains $Bin) {
 }
 $env:Path = "$env:Path;$Bin"
 
-Say "Listo. Prueba:  yt-texto `"https://www.youtube.com/watch?v=...`""
+Say "Listo. Prueba:  youtube-transcript `"https://www.youtube.com/watch?v=...`""
